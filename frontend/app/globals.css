@@ -1,0 +1,75 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  background-color: #05050b;
+  color: #e2e8f0;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+/* Custom Cyber Glow effects */
+.cyber-glow-blue {
+  text-shadow: 0 0 8px rgba(0, 240, 255, 0.6);
+}
+
+.cyber-glow-green {
+  text-shadow: 0 0 8px rgba(0, 255, 210, 0.6);
+}
+
+.cyber-panel {
+  background: rgba(10, 10, 22, 0.85);
+  backdrop-filter: blur(12px);
+  border: 1px solid #1e1e38;
+}
+
+.cyber-panel:hover {
+  border-color: #00f0ff;
+  box-shadow: 0 0 15px rgba(0, 240, 255, 0.15);
+}
+
+.cyber-input {
+  background: rgba(5, 5, 11, 0.9);
+  border: 1px solid #1e1e38;
+  color: #e2e8f0;
+  font-family: inherit;
+}
+
+.cyber-input:focus {
+  border-color: #00f0ff;
+  outline: none;
+  box-shadow: 0 0 8px rgba(0, 240, 255, 0.3);
+}
+
+.cyber-btn {
+  background: linear-gradient(135deg, #1e1e38 0%, #0a0a16 100%);
+  border: 1px solid #1e1e38;
+  color: #00f0ff;
+  transition: all 0.2s ease-in-out;
+}
+
+.cyber-btn:hover {
+  border-color: #00f0ff;
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+  background: #00f0ff;
+  color: #05050b;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #05050b;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1e1e38;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #00f0ff;
+}
