@@ -1,0 +1,3 @@
+# SunnyOS Git Ignore
+build/
+*.log
