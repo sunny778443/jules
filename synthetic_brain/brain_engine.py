@@ -4,7 +4,8 @@ Comprehensive integration of:
 - Biophysical Spiking Microcircuits (LIF, AdEx, Hodgkin-Huxley)
 - Cortical Column 6-Layer Architecture
 - Sensory Cortex & Thalamocortical Attentional Gating
-- Prefrontal Cortex & Hippocampal Episodic Memory
+- Multi-Network Frontal Cortex (dlPFC, vmPFC, OFC, PMC/SMA)
+- Hippocampal Episodic Memory
 - Basal Ganglia Action Selection & Dopaminergic RL
 - Endocrine Neuromodulators & Emotional Affect Dynamics (VAD)
 - Metacognition & Introspective Monologue Thought Stream
@@ -19,6 +20,7 @@ from typing import List, Dict, Any, Tuple, Optional
 from synthetic_brain.microcircuit import CorticalColumn
 from synthetic_brain.regions.sensory_cortex import SensoryCortex
 from synthetic_brain.regions.thalamus import ThalamocorticalGating, PrefrontalCortex
+from synthetic_brain.regions.frontal_cortex import FrontalCortexSystem
 from synthetic_brain.regions.hippocampus import Hippocampus
 from synthetic_brain.regions.basal_ganglia import BasalGanglia
 from synthetic_brain.endocrine import EndocrineSystem
@@ -41,7 +43,8 @@ class SyntheticBrain:
         # Modular Subsystems
         self.sensory_cortex = SensoryCortex(region_name="V1_A1", num_channels=16)
         self.thalamus = ThalamocorticalGating(num_channels=16)
-        self.pfc = PrefrontalCortex(memory_slots=4)
+        self.pfc = PrefrontalCortex(memory_slots=4)  # Legacy PFC interface
+        self.frontal_cortex = FrontalCortexSystem(action_dim=action_dim, memory_slots=4)  # Multi-network frontal lobe
         self.hippocampus = Hippocampus(num_episodes_capacity=100)
         self.basal_ganglia = BasalGanglia(action_dim=action_dim)
         self.cerebellum = Cerebellum(num_granule=100, num_purkinje=10, motor_dim=action_dim)
@@ -64,6 +67,7 @@ class SyntheticBrain:
 
         self.current_time = 0.0  # ms
         self.step_count = 0
+        self.last_action: Optional[int] = None
 
     def trigger_somatic_event(self, threat: float = 0.0, reward: float = 0.0, social_touch: float = 0.0, discomfort: float = 0.0):
         """Triggers direct hormonal responses based on somatic / emotional events."""
@@ -132,11 +136,22 @@ class SyntheticBrain:
         self.current_time += dt
         self.step_count += 1
 
-        # 6. PFC Working Memory & Goal
+        # 6. Multi-Network Frontal Cortex Processing (dlPFC, vmPFC, OFC, PMC/SMA)
         if raw_sensory_input:
             salient_feature = max(raw_sensory_input)
             self.pfc.update_working_memory(salient_feature)
+            self.frontal_cortex.dlpfc.update_buffer(salient_feature, relevance=1.0)
+
         pfc_state = self.pfc.get_executive_state()
+
+        frontal_eval = self.frontal_cortex.process_cognitive_control(
+            sensory_inputs=raw_sensory_input,
+            affect_valence=affect["vad"]["valence"],
+            risk_tolerance=bias["risk_tolerance"],
+            threat_level=effective_threat,
+            reward_feedback=reward_signal,
+            last_action=self.last_action
+        )
 
         # 7. Hippocampus Episodic Storage & Pattern Recall
         context_key = f"step_{self.step_count}"
@@ -144,13 +159,16 @@ class SyntheticBrain:
         recalled_episode = self.hippocampus.recall_episode(raw_sensory_input)
 
         # 8. Basal Ganglia Action Selection & Cerebellum Motor Correction
+        # Frontal utilities integrated into Basal Ganglia drives
         c_drives = [0.0] * self.action_dim
         num_spikes = len(all_spikes)
+        utilities = frontal_eval["subjective_utilities"]
         for i in range(self.action_dim):
-            base_drive = (raw_sensory_input[i % len(raw_sensory_input)] * 1.5) + (num_spikes * 0.05)
-            c_drives[i] = base_drive * (1.0 + (bias["risk_tolerance"] - 0.5) * 0.4)
+            base_drive = utilities[i % len(utilities)] + (num_spikes * 0.05)
+            c_drives[i] = base_drive
 
         selected_action, salience = self.basal_ganglia.compute_action_salience(c_drives)
+        self.last_action = selected_action
 
         # Cerebellum predicts and corrects motor output trajectory
         cerebellar_corrections = self.cerebellum.predict_motor_correction(selected_action, raw_sensory_input)
@@ -188,6 +206,7 @@ class SyntheticBrain:
             "step": self.step_count,
             "spike_count": num_spikes,
             "selected_action": selected_action,
+            "frontal_cortex_eval": frontal_eval,
             "cerebellar_corrections": cerebellar_corrections,
             "homeostasis": homeo_state,
             "threat_evaluation": threat_eval,
