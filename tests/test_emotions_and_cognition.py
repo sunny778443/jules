@@ -72,7 +72,7 @@ def test_synthetic_brain_humanlike_cycle():
     assert "hormones" in out1
 
     # Cycle 2: Threat event triggering Fear/Anxiety
-    out2 = brain.cognitive_cycle([0.9, 0.2, 0.1, 0.0], threat_level=0.9, dt=1.0)
+    out2 = brain.cognitive_cycle([0.9, 0.2, 0.1, 0.0], unconditioned_threat=0.9, dt=1.0)
     assert out2["hormones"]["cortisol"] > out1["hormones"]["cortisol"]
     assert out2["dominant_emotion"] in ["fear", "anxiety"]
     assert len(out2["inner_thought_stream"]) > 0
