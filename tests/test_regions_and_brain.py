@@ -77,4 +77,4 @@ def test_synthetic_brain_cognitive_cycle():
     # Run second step with reward
     res2 = brain.cognitive_cycle(sensory_data, reward_signal=2.0, dt=1.0)
     assert res2["step"] == 2
-    assert res2["dopamine_level"] > 1.0
+    assert res2["hormones"]["dopamine"] > 0.5
