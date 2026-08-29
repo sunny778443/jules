@@ -81,7 +81,7 @@ def test_agent_brain_end_to_end():
 
     assert output["goal"]["description"] == "Find suitable laptop"
     assert output["goal"]["status"] == "Active"
-    assert len(output["subgoals"]) == 4
+    assert len(output["plan"]["steps"]) == 4
     assert output["state"]["current_task"] == "Laptop Search"
     assert output["working_memory_snapshot"]["purpose"] == "college"
     assert len(brain.memory.episodic.all_events()) == 2
